@@ -1,4 +1,4 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { Quote, QuoteStatusCodes } from "xero-node";
@@ -21,7 +21,9 @@ async function createQuote(
   title: string | undefined,
   summary: string | undefined,
 ): Promise<Quote | undefined> {
-  await xeroClient.authenticate();
+
+  const client = createXeroClient()
+  await client.authenticate();
 
   const quote: Quote = {
     quoteNumber: quoteNumber,
@@ -40,8 +42,8 @@ async function createQuote(
     summary: summary,
   };
 
-  const response = await xeroClient.accountingApi.createQuotes(
-    xeroClient.tenantId,
+  const response = await client.accountingApi.createQuotes(
+    client.tenantId,
     {
       quotes: [quote],
     }, // quotes

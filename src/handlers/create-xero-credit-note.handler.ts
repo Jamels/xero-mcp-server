@@ -1,4 +1,4 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { CreditNote } from "xero-node";
@@ -17,7 +17,9 @@ async function createCreditNote(
   lineItems: CreditNoteLineItem[],
   reference: string | undefined,
 ): Promise<CreditNote | undefined> {
-  await xeroClient.authenticate();
+
+  const client = createXeroClient()
+  await client.authenticate();
 
   const creditNote: CreditNote = {
     type: CreditNote.TypeEnum.ACCRECCREDIT,
@@ -30,8 +32,8 @@ async function createCreditNote(
     status: CreditNote.StatusEnum.DRAFT,
   };
 
-  const response = await xeroClient.accountingApi.createCreditNotes(
-    xeroClient.tenantId,
+  const response = await client.accountingApi.createCreditNotes(
+    client.tenantId,
     {
       creditNotes: [creditNote],
     }, // creditNotes

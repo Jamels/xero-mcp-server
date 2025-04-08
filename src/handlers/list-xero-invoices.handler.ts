@@ -1,18 +1,20 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { Invoice } from "xero-node";
 import { getClientHeaders } from "../helpers/get-client-headers.js";
+import { create } from "domain";
 
 async function getInvoices(
   invoiceNumbers: string[] | undefined,
   contactIds: string[] | undefined,
   page: number,
 ): Promise<Invoice[]> {
-  await xeroClient.authenticate();
+  const client = createXeroClient();
+  await client.authenticate();
 
-  const invoices = await xeroClient.accountingApi.getInvoices(
-    xeroClient.tenantId,
+  const invoices = await client.accountingApi.getInvoices(
+    client.tenantId,
     undefined, // ifModifiedSince
     undefined, // where
     "UpdatedDateUTC DESC", // order

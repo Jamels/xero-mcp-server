@@ -1,4 +1,4 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { Contact, Phone, Address, Contacts } from "xero-node";
@@ -13,7 +13,9 @@ async function updateContact(
   address: Address | undefined,
   contactId: string,
 ): Promise<Contact | undefined> {
-  await xeroClient.authenticate();
+
+  const client = createXeroClient()
+  await client.authenticate();
 
   const contact: Contact = {
     name,
@@ -47,8 +49,8 @@ async function updateContact(
     contacts: [contact],
   };
 
-  const response = await xeroClient.accountingApi.updateContact(
-    xeroClient.tenantId,
+  const response = await client.accountingApi.updateContact(
+    client.tenantId,
     contactId, // contactId
     contacts, // contacts
     undefined, // idempotencyKey

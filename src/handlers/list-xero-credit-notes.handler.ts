@@ -1,4 +1,4 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { CreditNote } from "xero-node";
@@ -8,10 +8,12 @@ async function getCreditNotes(
   contactId: string | undefined,
   page: number,
 ): Promise<CreditNote[]> {
-  await xeroClient.authenticate();
 
-  const response = await xeroClient.accountingApi.getCreditNotes(
-    xeroClient.tenantId,
+  const client = createXeroClient()
+  await client.authenticate();
+
+  const response = await client.accountingApi.getCreditNotes(
+    client.tenantId,
     undefined, // ifModifiedSince
     contactId ? `Contact.ContactID=guid("${contactId}")` : undefined, // where
     "UpdatedDateUTC DESC", // order

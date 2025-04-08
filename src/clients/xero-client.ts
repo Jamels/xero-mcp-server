@@ -15,11 +15,22 @@ const client_secret = process.env.XERO_CLIENT_SECRET;
 const bearer_token = process.env.XERO_CLIENT_BEARER_TOKEN;
 const grant_type = "client_credentials";
 
+export const DEFAULT_ACCOUNTING_SCOPES = [
+  "accounting.transactions",
+  "accounting.contacts",
+  "accounting.settings.read"
+]
+
+export const DEFAULT_PAYROLL_SCOPES = DEFAULT_ACCOUNTING_SCOPES.concat([
+  "payroll.employees.read"
+])
+
+
 if (!bearer_token && (!client_id || !client_secret)) {
   throw Error("Environment Variables not set - please check your .env file");
 }
 
-abstract class MCPXeroClient extends XeroClient {
+export abstract class MCPXeroClient extends XeroClient {
   public tenantId: string;
   private shortCode: string;
 
@@ -29,7 +40,7 @@ abstract class MCPXeroClient extends XeroClient {
     this.shortCode = "";
   }
 
-  public abstract authenticate(scope?:string[]): Promise<void>;
+  public abstract authenticate(): Promise<void>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override async updateTenants(fullOrgDetails?: boolean): Promise<any[]> {
@@ -81,13 +92,14 @@ class CustomConnectionsXeroClient extends MCPXeroClient {
     clientId: string;
     clientSecret: string;
     grantType: string;
+    scopes?: string[];
   }) {
     super(config);
     this.clientId = config.clientId;
     this.clientSecret = config.clientSecret;
   }
 
-  public async getClientCredentialsToken(scope: string[]): Promise<TokenSet> {
+  public async getClientCredentialsToken(): Promise<TokenSet> {
     const credentials = Buffer.from(
       `${this.clientId}:${this.clientSecret}`,
     ).toString("base64");
@@ -95,7 +107,7 @@ class CustomConnectionsXeroClient extends MCPXeroClient {
     try {
       const response = await axios.post(
         "https://identity.xero.com/connect/token",
-        `grant_type=client_credentials&scope=${encodeURIComponent(scope.join(" "))}`,
+        `grant_type=client_credentials&scope=${encodeURIComponent(this.config?.scopes?.join(" ") || "")}`,
         {
           headers: {
             Authorization: `Basic ${credentials}`,
@@ -131,15 +143,8 @@ class CustomConnectionsXeroClient extends MCPXeroClient {
   }
 
   public async authenticate(
-    scope: string[] = [
-      "accounting.transactions",
-      "accounting.contacts",
-      "accounting.settings.read",
-      "payroll.employees",
-      "payroll.employees.read",
-    ],
   ): Promise<void> {
-    const tokenResponse = await this.getClientCredentialsToken(scope);
+    const tokenResponse = await this.getClientCredentialsToken();
 
     this.setTokenSet({
       access_token: tokenResponse.access_token,
@@ -166,7 +171,9 @@ class BearerTokenXeroClient extends MCPXeroClient {
   }
 }
 
-export const xeroClient = bearer_token
+export const createXeroClient = (scopes: string[] = DEFAULT_ACCOUNTING_SCOPES) : MCPXeroClient => {
+
+  const xeroClient = bearer_token
   ? new BearerTokenXeroClient({
       bearerToken: bearer_token,
     })
@@ -174,4 +181,8 @@ export const xeroClient = bearer_token
       clientId: client_id!,
       clientSecret: client_secret!,
       grantType: grant_type,
+      scopes
     });
+
+    return xeroClient
+}

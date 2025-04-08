@@ -1,4 +1,4 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient, MCPXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { Invoice } from "xero-node";
@@ -12,12 +12,11 @@ interface InvoiceLineItem {
   taxType: string;
 }
 
-async function getInvoice(invoiceId: string): Promise<Invoice | undefined> {
-  await xeroClient.authenticate();
+async function getInvoice(client: MCPXeroClient, invoiceId: string): Promise<Invoice | undefined> {
 
   // First, get the current invoice to check its status
-  const response = await xeroClient.accountingApi.getInvoice(
-    xeroClient.tenantId,
+  const response = await client.accountingApi.getInvoice(
+    client.tenantId,
     invoiceId, // invoiceId
     undefined, // unitdp
     getClientHeaders(), // options
@@ -27,6 +26,7 @@ async function getInvoice(invoiceId: string): Promise<Invoice | undefined> {
 }
 
 async function updateInvoice(
+  client: MCPXeroClient,
   invoiceId: string,
   lineItems?: InvoiceLineItem[],
   reference?: string,
@@ -38,8 +38,8 @@ async function updateInvoice(
     dueDate: dueDate,
   };
 
-  const response = await xeroClient.accountingApi.updateInvoice(
-    xeroClient.tenantId,
+  const response = await client.accountingApi.updateInvoice(
+    client.tenantId,
     invoiceId, // invoiceId
     {
       invoices: [invoice],
@@ -62,7 +62,11 @@ export async function updateXeroInvoice(
   dueDate?: string,
 ): Promise<XeroClientResponse<Invoice>> {
   try {
-    const existingInvoice = await getInvoice(invoiceId);
+
+    const client = createXeroClient()
+    await client.authenticate();
+  
+    const existingInvoice = await getInvoice(client,invoiceId);
 
     const invoiceStatus = existingInvoice?.status;
 
@@ -76,6 +80,7 @@ export async function updateXeroInvoice(
     }
 
     const updatedInvoice = await updateInvoice(
+      client,
       invoiceId,
       lineItems,
       reference,

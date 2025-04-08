@@ -1,4 +1,4 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { Invoice } from "xero-node";
@@ -17,7 +17,9 @@ async function createInvoice(
   lineItems: InvoiceLineItem[],
   reference: string | undefined,
 ): Promise<Invoice | undefined> {
-  await xeroClient.authenticate();
+
+  const client = createXeroClient()
+  await client.authenticate();
 
   const invoice: Invoice = {
     type: Invoice.TypeEnum.ACCREC,
@@ -33,8 +35,8 @@ async function createInvoice(
     status: Invoice.StatusEnum.DRAFT,
   };
 
-  const response = await xeroClient.accountingApi.createInvoices(
-    xeroClient.tenantId,
+  const response = await client.accountingApi.createInvoices(
+    client.tenantId,
     {
       invoices: [invoice],
     }, // invoices

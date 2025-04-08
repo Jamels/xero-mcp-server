@@ -33,17 +33,15 @@ The response presents a complete overview of all staff currently registered in y
         ...(employees?.map((employee: Employee) => ({
           type: "text" as const,
           text: [
-            `Employee: ${employee.firstName} ${employee.lastName}`,
-            `ID: ${employee.employeeID}`,
-            employee.dateOfBirth ? `Date of Birth: ${employee.dateOfBirth}` : null,
+            `Employee: ${employee.employeeID}`,
             employee.email ? `Email: ${employee.email}` : "No email",
             employee.gender ? `Gender: ${employee.gender}` : null,
             employee.phoneNumber ? `Phone: ${employee.phoneNumber}` : null,
             employee.startDate ? `Start Date: ${employee.startDate}` : null,
             employee.engagementType ? `Engagement Type: ${employee.engagementType}` : "No status", // Permanent, FixedTerm, Casual
             employee.title ? `Title: ${employee.title}` : null,
-            //employee.firstName ? `First Name: ${employee.firstName}` : null,
-            //employee.lastName ? `Last Name: ${employee.lastName}` : null,
+            employee.firstName ? `First Name: ${employee.firstName}` : null,
+            employee.lastName ? `Last Name: ${employee.lastName}` : null,
             employee.updatedDateUTC ? `Last Updated: ${employee.updatedDateUTC}` : null,
           ]
             .filter(Boolean)

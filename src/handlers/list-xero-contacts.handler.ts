@@ -1,14 +1,16 @@
-import { xeroClient } from "../clients/xero-client.js";
+import { createXeroClient } from "../clients/xero-client.js";
 import { Contact } from "xero-node";
 import { XeroClientResponse } from "../types/tool-response.js";
 import { formatError } from "../helpers/format-error.js";
 import { getClientHeaders } from "../helpers/get-client-headers.js";
 
 async function getContacts(): Promise<Contact[]> {
-  await xeroClient.authenticate();
+  
+  const client = createXeroClient()
+  await client.authenticate();
 
-  const contacts = await xeroClient.accountingApi.getContacts(
-    xeroClient.tenantId,
+  const contacts = await createXeroClient().accountingApi.getContacts(
+    client.tenantId,
     undefined, // ifModifiedSince
     undefined, // where
     undefined, // order
