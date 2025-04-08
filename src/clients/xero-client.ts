@@ -29,7 +29,7 @@ abstract class MCPXeroClient extends XeroClient {
     this.shortCode = "";
   }
 
-  public abstract authenticate(): Promise<void>;
+  public abstract authenticate(scope?:string[]): Promise<void>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   override async updateTenants(fullOrgDetails?: boolean): Promise<any[]> {
@@ -87,9 +87,7 @@ class CustomConnectionsXeroClient extends MCPXeroClient {
     this.clientSecret = config.clientSecret;
   }
 
-  public async getClientCredentialsToken(): Promise<TokenSet> {
-    const scope =
-      "accounting.transactions accounting.contacts accounting.settings.read";
+  public async getClientCredentialsToken(scope: string[]): Promise<TokenSet> {
     const credentials = Buffer.from(
       `${this.clientId}:${this.clientSecret}`,
     ).toString("base64");
@@ -97,7 +95,7 @@ class CustomConnectionsXeroClient extends MCPXeroClient {
     try {
       const response = await axios.post(
         "https://identity.xero.com/connect/token",
-        `grant_type=client_credentials&scope=${encodeURIComponent(scope)}`,
+        `grant_type=client_credentials&scope=${encodeURIComponent(scope.join(" "))}`,
         {
           headers: {
             Authorization: `Basic ${credentials}`,
@@ -132,8 +130,16 @@ class CustomConnectionsXeroClient extends MCPXeroClient {
     }
   }
 
-  public async authenticate() {
-    const tokenResponse = await this.getClientCredentialsToken();
+  public async authenticate(
+    scope: string[] = [
+      "accounting.transactions",
+      "accounting.contacts",
+      "accounting.settings.read",
+      "payroll.employees",
+      "payroll.employees.read",
+    ],
+  ): Promise<void> {
+    const tokenResponse = await this.getClientCredentialsToken(scope);
 
     this.setTokenSet({
       access_token: tokenResponse.access_token,
