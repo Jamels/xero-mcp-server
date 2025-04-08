@@ -5,6 +5,8 @@ import ListInvoicesTool from "./list-invoices.tool.js";
 import ListPayrollEmployeesTool from "./list-payroll-employees.tool.js";
 import ListQuotesTool from "./list-quotes.tool.js";
 import ListTaxRatesTool from "./list-tax-rates.tool.js";
+import ListTrialBalanceTool from "./list-trial-balance.tool.js";
+import ListProfitAndLossTool from "./list-profit-and-loss.tool.js";
 
 export const ListTools = [
   ListAccountsTool,
@@ -14,4 +16,6 @@ export const ListTools = [
   ListPayrollEmployeesTool,
   ListQuotesTool,
   ListTaxRatesTool,
+  ListTrialBalanceTool,
+  ListProfitAndLossTool,
 ];

@@ -18,8 +18,10 @@ const grant_type = "client_credentials";
 export const DEFAULT_ACCOUNTING_SCOPES = [
   "accounting.transactions",
   "accounting.contacts",
-  "accounting.settings.read"
+  "accounting.settings.read",
+  "accounting.reports.read"
 ]
+
 
 export const DEFAULT_PAYROLL_SCOPES = DEFAULT_ACCOUNTING_SCOPES.concat([
   "payroll.employees.read"
